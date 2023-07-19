@@ -4,14 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9b47ab1c-3568-48e6-961f-b8bb7a56629a" name="변경" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/Main.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/psd/PsdReader.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/psd/domain/PsdHeader.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/psd/domain/PsdLayer.java" afterDir="false" />
+    <list default="true" id="9b47ab1c-3568-48e6-961f-b8bb7a56629a" name="변경" comment="psd layer channel 저장까지">
+      <change afterPath="$PROJECT_DIR$/src/main/resources/psds.psd" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/psd/PsdReader.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/psd/PsdReader.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,11 +46,12 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "WebServerToolWindowFactoryState": "false",
-    "last_opened_file_path": "C:/Users/user/git/psd/src/main/java/psd"
+    "last_opened_file_path": "C:/Users/user/git/psd/src/main/resources"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\user\git\psd\src\main\resources" />
       <recent name="C:\Users\user\git\psd\src\main\java\psd" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
@@ -100,8 +99,17 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1689055603686</updated>
-      <workItem from="1689055606197" duration="5017000" />
+      <workItem from="1689055606197" duration="5143000" />
+      <workItem from="1689400766058" duration="4215000" />
     </task>
+    <task id="LOCAL-00001" summary="psd layer channel 저장까지">
+      <created>1689062129493</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1689062129493</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -117,5 +125,9 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="psd layer channel 저장까지" />
+    <option name="LAST_COMMIT_MESSAGE" value="psd layer channel 저장까지" />
   </component>
 </project>

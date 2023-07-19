@@ -15,6 +15,7 @@ public class PsdReader {
     protected int layerCount;
     protected PsdLayer[] psdLayers;
     protected int frameCount;
+    protected int readCount;
     protected BufferedImage[] frames;
 
     /**
@@ -24,8 +25,11 @@ public class PsdReader {
     public void open(InputStream stream) {
         init();
         setInput(stream);
+    }
 
-
+    public void run() {
+        readHeader();
+        readLayers();
     }
 
     public void readHeader() {
@@ -46,7 +50,7 @@ public class PsdReader {
 
     public void readLayers() {
         bufferLen = readInt();
-        if(bufferLen < 0) return; // 레이어 없음
+        if(bufferLen < 0) return;
         final int layerInfoLen = readInt();
         layerCount = readShort();
 
@@ -66,6 +70,20 @@ public class PsdReader {
             }
             layer.setChannelId(channelId);
             layer.setChannelLine(channelLine);
+            if (!readString(4).equals("8BIM")) {
+                throw new RuntimeException("sign not match");
+            }
+            layer.setModeKey(readString(4));
+            layer.setTransparency(readByte());
+            layer.setClipping(readByte() > 0);
+            int flag = readByte();
+            if (flag != 0) {
+                layer.setProtectTransparency((flag & 0x01) == 1);
+                layer.setVision((flag & 0x02) >> 1 == 1);
+            }
+            jumpBytes(1);
+            int dataFieldLen = readInt();
+            jumpBytes(dataFieldLen);
         }
     }
 
@@ -90,10 +108,23 @@ public class PsdReader {
         int rByte = 0;
         try {
             rByte = input.read();
+            readCount++;
         } catch (IOException e) {
 
         }
         return rByte;
+    }
+    /**
+     * XByte 읽기
+     * @return
+     */
+    protected int[] readBytes(int len) {
+        int []rBytes = new int[len];
+
+        for (int i = 0; i < len; i++) {
+            rBytes[i] = readByte();
+        }
+        return rBytes;
     }
 
     /**
@@ -170,6 +201,7 @@ public class PsdReader {
             psdLayers = null;
             frameCount = 0;
             frames = null;
+            readCount = 0;
         } catch (IOException ignored) {
         }
     }
