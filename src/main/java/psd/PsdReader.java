@@ -10,6 +10,7 @@ import java.io.InputStream;
 
 public class PsdReader {
     protected BufferedInputStream input;
+    protected int inputLen;
     protected int bufferLen;
     protected PsdHeader psdHeader;
     protected int layerCount;
@@ -18,21 +19,30 @@ public class PsdReader {
     protected int readCount;
     protected BufferedImage[] frames;
 
+    public PsdReader() {
+        bufferLen = 0;
+        psdHeader = new PsdHeader();
+        layerCount = 0;
+        psdLayers = null;
+        frameCount = 0;
+        frames = null;
+        readCount = 0;
+    }
+
     /**
      * stream(psd) 열기
      * @param stream
      */
-    public void open(InputStream stream) {
-        init();
+    public void open(InputStream stream) throws IOException {
         setInput(stream);
     }
 
-    public void run() {
+    public void run() throws IOException {
         readHeader();
         readLayers();
     }
 
-    public void readHeader() {
+    public void readHeader() throws IOException {
         if (! readString(4).equals("8BPS")) {
             throw new RuntimeException("Signature not match");
         }
@@ -46,9 +56,11 @@ public class PsdReader {
         psdHeader.setColorMode(getColorMode(readShort()));
         psdHeader.setColorModeLen(readInt());
         jumpBytes(psdHeader.getColorModeLen());
+        psdHeader.setImageResourcesLen(readInt());
+        jumpBytes(psdHeader.getImageResourcesLen());
     }
 
-    public void readLayers() {
+    public void readLayers() throws IOException {
         bufferLen = readInt();
         if(bufferLen < 0) return;
         final int layerInfoLen = readInt();
@@ -85,6 +97,7 @@ public class PsdReader {
             int dataFieldLen = readInt();
             jumpBytes(dataFieldLen);
         }
+        this.psdLayers = psdLayers;
     }
 
     public void readLayersImage() {
@@ -95,9 +108,10 @@ public class PsdReader {
      * stream(psd) 넣기
      * @param stream
      */
-    protected void setInput(InputStream stream) {
+    protected void setInput(InputStream stream) throws IOException {
         if (stream instanceof BufferedInputStream) input = (BufferedInputStream) stream;
         else input = new BufferedInputStream(stream);
+        inputLen = input.available();
     }
 
     /**
@@ -192,17 +206,18 @@ public class PsdReader {
     /**
      * 재설정
      */
-    protected void init() {
-        try {
-            input.close();
-            bufferLen = 0;
-            psdHeader = null;
-            layerCount = 0;
-            psdLayers = null;
-            frameCount = 0;
-            frames = null;
-            readCount = 0;
-        } catch (IOException ignored) {
-        }
+    protected void init() throws IOException {
+        input.close();
+        inputLen = input.available();
+        bufferLen = 0;
+        psdHeader = null;
+        layerCount = 0;
+        psdLayers = null;
+        frameCount = 0;
+        frames = null;
+        readCount = 0;
+    }
+    protected int getStreamOffset() throws IOException {
+        return inputLen - input.available() + 1;
     }
 }

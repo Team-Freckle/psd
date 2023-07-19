@@ -12,4 +12,5 @@ public class PsdHeader {
     private int channelBitsDepth;
     private String colorMode;
     private int colorModeLen;
+    private int imageResourcesLen;
 }
