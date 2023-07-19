@@ -7,6 +7,9 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 
 public class PsdReader {
     protected BufferedInputStream input;
@@ -16,7 +19,6 @@ public class PsdReader {
     protected int layerCount;
     protected PsdLayer[] psdLayers;
     protected int frameCount;
-    protected int readCount;
     protected BufferedImage[] frames;
 
     public PsdReader() {
@@ -26,7 +28,6 @@ public class PsdReader {
         psdLayers = null;
         frameCount = 0;
         frames = null;
-        readCount = 0;
     }
 
     /**
@@ -94,10 +95,37 @@ public class PsdReader {
                 layer.setVision((flag & 0x02) >> 1 == 1);
             }
             jumpBytes(1);
-            int dataFieldLen = readInt();
-            jumpBytes(dataFieldLen);
+            int dataFieldLen = readInt() + getStreamOffset();
+            int layerMaskAdjustmentLen = readInt();
+            jumpBytes(layerMaskAdjustmentLen);
+            int layerBlendingRangesLen = readInt();
+            jumpBytes(layerBlendingRangesLen);
+            int nameLen = readByte();
+            if((nameLen + 1) % 4 > 0) nameLen += 4 - (nameLen + 1) % 4;
+            jumpBytes(nameLen);
+
+            while (getStreamOffset() < dataFieldLen) {
+                String sign = readString(4);
+                if(! (sign.equals("8BIM") || sign.equals("8B64"))) {
+                    throw new RuntimeException("sign not match : " + getStreamOffset());
+                }
+                layer = readMoreLayerInfo(layer, readString(4), readInt());
+            }
+
+            psdLayers[iLayerCount] = layer;
         }
         this.psdLayers = psdLayers;
+    }
+
+    protected PsdLayer readMoreLayerInfo(PsdLayer layer, String key, int len) {
+        switch (key) {
+            case "luni":
+                layer.setName(readUtf16(len).substring(2));
+                break;
+            default:
+                jumpBytes(len);
+        }
+        return layer;
     }
 
     public void readLayersImage() {
@@ -122,7 +150,6 @@ public class PsdReader {
         int rByte = 0;
         try {
             rByte = input.read();
-            readCount++;
         } catch (IOException e) {
 
         }
@@ -167,6 +194,37 @@ public class PsdReader {
             rString = rString + (char) readByte();
         }
         return rString;
+    }
+    /**
+     * utf 16 디코딩
+     * @return
+     */
+    protected String readUtf16(int len) {
+        ArrayList<Byte> rBytes = new ArrayList<>();
+        try {
+            boolean first = true;
+            Byte[] inputB = new Byte[2];
+            for(int i = 0; i < len; i++) {
+                inputB[first ? 0 : 1] = (byte) input.read();
+
+                if(! first) {  // && ! (inputB[0] == 0 && inputB[1] == 0)
+                    rBytes.add(inputB[0]);
+                    rBytes.add(inputB[1]);
+                }
+
+                first = ! first;
+            }
+            System.out.println(rBytes);
+
+        } catch (IOException e) {
+
+        }
+        byte[] byteArray = new byte[rBytes.size()];
+        for(int i = 0; i < rBytes.size(); i++) {
+            byteArray[i] = rBytes.get(i);
+        }
+
+        return new String(byteArray, 0, byteArray.length, StandardCharsets.UTF_16);
     }
     /**
      * 배열 헤드 넘기기
@@ -215,9 +273,17 @@ public class PsdReader {
         psdLayers = null;
         frameCount = 0;
         frames = null;
-        readCount = 0;
     }
     protected int getStreamOffset() throws IOException {
         return inputLen - input.available() + 1;
+    }
+
+    @Override
+    public String toString() {
+        String layer = "";
+        for(int i = 0; i < layerCount; i++) {
+            layer += psdLayers[i].toString() + "\n";
+        }
+        return psdHeader.toString() + "\n" + layer;
     }
 }

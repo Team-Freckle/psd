@@ -11,14 +11,15 @@ public class Main {
         PsdReader psdReader = new PsdReader();
         BinaryReader binaryReader = new BinaryReader();
 
-        FileInputStream fis = new FileInputStream("C:/Users/cksgu/git/psd/src/main/resources/psds.psd");
+        FileInputStream fis = new FileInputStream("C:/Users/cksgu/git/psd/src/main/resources/psdss.psd");
         BufferedInputStream bis = new BufferedInputStream(fis);
 
         binaryReader.setInput(bis);
         System.out.println(binaryReader.getBinary());
-        bis = new BufferedInputStream(new FileInputStream("C:/Users/cksgu/git/psd/src/main/resources/psds.psd"));
+        bis = new BufferedInputStream(new FileInputStream("C:/Users/cksgu/git/psd/src/main/resources/psdss.psd"));
 
         psdReader.open(bis);
         psdReader.run();
+        System.out.println(psdReader.toString());
     }
 }
