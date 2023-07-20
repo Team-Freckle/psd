@@ -43,6 +43,7 @@ public class PsdReader {
     public void run() throws IOException {
         readHeader();
         readLayers();
+        readLayersImage();
     }
 
     public void readHeader() throws IOException {
