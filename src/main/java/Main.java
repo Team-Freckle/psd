@@ -1,10 +1,7 @@
 import psd.BinaryReader;
 import psd.PsdReader;
 
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 
 public class Main {
     public static void main(String[]args) throws IOException {
@@ -20,6 +17,7 @@ public class Main {
 
         psdReader.open(bis);
         psdReader.run();
+
         System.out.println(psdReader.toString());
     }
 }

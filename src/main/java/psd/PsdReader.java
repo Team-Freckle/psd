@@ -1,9 +1,11 @@
 package psd;
 
+import lombok.Data;
 import psd.domain.PsdHeader;
 import psd.domain.PsdLayer;
 
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferInt;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,6 +13,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
+@Data
 public class PsdReader {
     protected BufferedInputStream input;
     protected int inputLen;
@@ -18,16 +21,15 @@ public class PsdReader {
     protected PsdHeader psdHeader;
     protected int layerCount;
     protected PsdLayer[] psdLayers;
-    protected int frameCount;
-    protected BufferedImage[] frames;
+    protected short[] lineLen;
+    protected int iLine;
+    protected String encoding;
 
     public PsdReader() {
         bufferLen = 0;
         psdHeader = new PsdHeader();
         layerCount = 0;
         psdLayers = null;
-        frameCount = 0;
-        frames = null;
     }
 
     /**
@@ -129,7 +131,151 @@ public class PsdReader {
     }
 
     public void readLayersImage() {
+        for(int iLayerCount = 0; iLayerCount < layerCount; iLayerCount++) {
+            PsdLayer layer = psdLayers[iLayerCount];
+            byte[] r = null, g = null, b = null, a = null;
+            for(int iChannelCount = 0; iChannelCount < layer.getChannelCount(); iChannelCount++) {
+                int id = layer.getChannelId()[iChannelCount];
+                switch (id) {
+                    case 0:
+                        r = readChannelImage(layer.getRight() - layer.getLeft()
+                                , layer.getBottom() - layer.getTop());
+                        break;
+                    case 1:
+                        g = readChannelImage(layer.getRight() - layer.getLeft()
+                                , layer.getBottom() - layer.getTop());
+                        break;
+                    case 2:
+                        b = readChannelImage(layer.getRight() - layer.getLeft()
+                                , layer.getBottom() - layer.getTop());
+                        break;
+                    case -1:
+                        a = readChannelImage(layer.getRight() - layer.getLeft()
+                                , layer.getBottom() - layer.getTop());
+                        break;
+                    default:
+                        readChannelImage(layer.getRight() - layer.getLeft()
+                                , layer.getBottom() - layer.getTop());
+                }
+                int n = (layer.getRight() - layer.getLeft()) * (layer.getBottom() - layer.getTop());
+                if (r == null)
+                    r = generateByteArray(n, 0);
+                if (g == null)
+                    g = generateByteArray(n, 0);
+                if (b == null)
+                    b = generateByteArray(n, 0);
+                if (a == null)
+                    a = generateByteArray(n, 255);
+                BufferedImage image = makeRGBImage(layer.getRight() - layer.getLeft()
+                        , layer.getBottom() - layer.getTop()
+                        , r, g, b, a);
+                psdLayers[iLayerCount].setFrame(image);
+            }
+            lineLen = null;
+            if(bufferLen > 0) {
+                int n = readInt();
+                jumpBytes(n);
+            }
+        }
+    }
 
+    protected byte[] readChannelImage(int width, int height) {
+        byte[] b = null;
+        int size = width * height;
+        short encoding =  readShort();
+        if(encoding == 0) this.encoding = "raw";
+        else if(encoding == 1) this.encoding = "rle";
+        else if(encoding == 2) this.encoding = "zip";
+        else if(encoding == 3) this.encoding = "pzip";
+
+        boolean isRLE = this.encoding.equals("rle");
+        if(isRLE) {
+            readLineLen(height);
+        }
+        if(isRLE) {
+            b = readCompressedChannelImage(width, height);
+        } else if(this.encoding.equals("raw")) {
+            b = new byte[size];
+            readBytes(b, size);
+        }
+        return b;
+    }
+
+    protected byte[] readCompressedChannelImage(int width, int height) {
+        byte[] b = new byte[width * height];
+        byte[] s = new byte[width * 2];
+        int pos = 0;
+        for (int i = 0; i < height; i++) {
+            if (iLine >= lineLen.length) {
+                throw new RuntimeException("format err");
+            }
+            int len = lineLen[iLine++];
+            readBytes(s, len);
+            decodeRLE(s, 0, len, b, pos);
+            pos += width;
+        }
+        return b;
+    }
+
+    protected void decodeRLE(byte[] encoding, int encodingIndex, int srcLen, byte[] raw, int rawIndex) {
+        try {
+            int max = encodingIndex + srcLen;
+            while (encodingIndex < max) {
+                byte b = encoding[encodingIndex++];
+                int n = b;
+                if (n < 0) {
+                    n = 1 - n;
+                    b = encoding[encodingIndex++];
+                    for (int i = 0; i < n; i++) {
+                        raw[rawIndex++] = b;
+                    }
+                } else {
+                    n = n + 1;
+                    System.arraycopy(encoding, encodingIndex, raw, rawIndex, n);
+                    rawIndex += n;
+                    encodingIndex += n;
+                }
+            }
+        } catch (Exception e) {
+        }
+    }
+
+    protected void readLineLen(int lineCount) {
+        lineLen = new short[lineCount];
+        for(int i = 0; i < lineCount; i++) {
+            lineLen[i] = readShort();
+        }
+        iLine = 0;
+    }
+
+    protected BufferedImage makeRGBImage(int width, int height, byte[] r, byte[] g, byte[] b, byte[] a) {
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        int[] data = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+        int n = width * height;
+        int j = 0;
+        while (j < n) {
+            try {
+                int ac = a[j] & 0xff;
+                int rc = r[j] & 0xff;
+                int gc = g[j] & 0xff;
+                int bc = b[j] & 0xff;
+                data[j] = (((((ac << 8) | rc) << 8) | gc) << 8) | bc;
+            } catch (Exception e) {
+            }
+            j++;
+        }
+        return image;
+    }
+
+    protected byte[] generateByteArray(int size, int value) {
+        byte[] b = new byte[size];
+        if (value != 0) {
+            byte v = (byte) value;
+            for (int i = 0; i < size; i++) {
+                b[i] = v;
+            }
+        }
+        return b;
     }
 
     /**
@@ -159,19 +305,22 @@ public class PsdReader {
      * XByte 읽기
      * @return
      */
-    protected int[] readBytes(int len) {
-        int []rBytes = new int[len];
-
-        for (int i = 0; i < len; i++) {
-            rBytes[i] = readByte();
+    protected int readBytes(byte[] bytes, int n) {
+        if (bytes == null)
+            return 0;
+        int r = 0;
+        try {
+            r = input.read(bytes, 0, n);
+        } catch (IOException e) {
         }
-        return rBytes;
+        return r;
     }
 
-    /**
-     * 4Byte(int) 읽기
-     * @return
-     */
+
+        /**
+         * 4Byte(int) 읽기
+         * @return
+         */
     protected int readInt() {
         return (((((readByte() << 8) | readByte()) << 8) | readByte()) << 8) | readByte();
     }
@@ -271,8 +420,6 @@ public class PsdReader {
         psdHeader = null;
         layerCount = 0;
         psdLayers = null;
-        frameCount = 0;
-        frames = null;
     }
     protected int getStreamOffset() throws IOException {
         return inputLen - input.available() + 1;
