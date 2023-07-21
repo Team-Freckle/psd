@@ -24,7 +24,7 @@ public class Main {
         try {
             // PNG 파일로 저장하고 싶은 경우
             FileOutputStream fos = new FileOutputStream("output.png");
-            pngEncoder.write(psdReader.getPsdLayers()[0].getFrame(), fos);
+            pngEncoder.write(psdReader.getPreview(), fos);
             fos.close();
 
             // 여기서 PNG 파일이 생성됩니다.

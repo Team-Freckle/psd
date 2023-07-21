@@ -24,9 +24,12 @@ public class PsdReader {
     protected short[] lineLen;
     protected int iLine;
     protected String encoding;
+    protected BufferedImage preview;
+    protected int layerMaskInfoLen;
 
     public PsdReader() {
         bufferLen = 0;
+        layerMaskInfoLen = 0;
         psdHeader = new PsdHeader();
         layerCount = 0;
         psdLayers = null;
@@ -44,6 +47,7 @@ public class PsdReader {
         readHeader();
         readLayers();
         readLayersImage();
+        readPreview();
     }
 
     public void readHeader() throws IOException {
@@ -66,6 +70,7 @@ public class PsdReader {
 
     public void readLayers() throws IOException {
         bufferLen = readInt();
+        layerMaskInfoLen = getStreamOffset() + bufferLen;
         if(bufferLen < 0) return;
         final int layerInfoLen = readInt();
         layerCount = readShort();
@@ -131,7 +136,7 @@ public class PsdReader {
         return layer;
     }
 
-    public void readLayersImage() {
+    public void readLayersImage() throws IOException {
         for(int iLayerCount = 0; iLayerCount < layerCount; iLayerCount++) {
             PsdLayer layer = psdLayers[iLayerCount];
             byte[] r = null, g = null, b = null, a = null;
@@ -172,18 +177,60 @@ public class PsdReader {
                         , r, g, b, a);
                 psdLayers[iLayerCount].setFrame(image);
             }
+            System.out.println("bef : " + getStreamOffset());
             lineLen = null;
-            if(bufferLen > 0) {
+            if(bufferLen > 0) {  // global layer mask info
                 int n = readInt();
                 jumpBytes(n);
             }
+            jumpBytes(layerMaskInfoLen - getStreamOffset());
+            System.out.println("aft : " + getStreamOffset());
         }
+    }
+
+    protected void readPreview() throws IOException {
+        short encoding = readShort();
+        if(encoding == 0) this.encoding = "raw";
+        else if(encoding == 1) this.encoding = "rle";
+        else if(encoding == 2) this.encoding = "zip";
+        else if(encoding == 3) this.encoding = "pzip";
+
+        System.out.println(getStreamOffset());
+        byte[] r = null, g = null, b = null, a = null;
+        for(int iChannelCount = 0; iChannelCount < psdHeader.getChannelCount(); iChannelCount++) {
+            switch (iChannelCount) {
+                case 0:
+                    r = readChannelImage(psdHeader.getWidth(), psdHeader.getHeight());
+                    break;
+                case 1:
+                    g = readChannelImage(psdHeader.getWidth(), psdHeader.getHeight());
+                    break;
+                case 2:
+                    b = readChannelImage(psdHeader.getWidth(), psdHeader.getHeight());
+                    break;
+                case 3:
+                    a = readChannelImage(psdHeader.getWidth(), psdHeader.getHeight());
+                    break;
+                default:
+                    readChannelImage(psdHeader.getWidth(), psdHeader.getHeight());
+            }
+        }
+        int n = psdHeader.getWidth() * psdHeader.getHeight();
+        if (r == null)
+            r = generateByteArray(n, 0);
+        if (g == null)
+            g = generateByteArray(n, 0);
+        if (b == null)
+            b = generateByteArray(n, 0);
+        if (a == null)
+            a = generateByteArray(n, 255);
+        preview = makeRGBImage(psdHeader.getWidth(), psdHeader.getHeight(), r, g, b, a);
     }
 
     protected byte[] readChannelImage(int width, int height) {
         byte[] b = null;
         int size = width * height;
-        short encoding =  readShort();
+        short encoding = readShort();
         if(encoding == 0) this.encoding = "raw";
         else if(encoding == 1) this.encoding = "rle";
         else if(encoding == 2) this.encoding = "zip";
@@ -194,7 +241,7 @@ public class PsdReader {
             readLineLen(height);
         }
         if(isRLE) {
-            b = readCompressedChannelImage(width, height);
+            b = readLayerCompressedChannelImage(width, height);
         } else if(this.encoding.equals("raw")) {
             b = new byte[size];
             readBytes(b, size);
@@ -202,7 +249,7 @@ public class PsdReader {
         return b;
     }
 
-    protected byte[] readCompressedChannelImage(int width, int height) {
+    protected byte[] readLayerCompressedChannelImage(int width, int height) {
         byte[] b = new byte[width * height];
         byte[] s = new byte[width * 2];
         int pos = 0;
