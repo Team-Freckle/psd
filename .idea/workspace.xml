@@ -4,10 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9b47ab1c-3568-48e6-961f-b8bb7a56629a" name="변경" comment="출력 성공">
+    <list default="true" id="9b47ab1c-3568-48e6-961f-b8bb7a56629a" name="변경" comment="preview 출력중 (오류 발생)">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/output.png" beforeDir="false" afterPath="$PROJECT_DIR$/output.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/psd/PsdReader.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/psd/PsdReader.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -32,6 +30,29 @@
               <path>
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
                 <item name="psd" type="f1a62948:ProjectNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="psd" type="f1a62948:ProjectNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="psd" type="f1a62948:ProjectNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="build" type="c8890929:TasksNode$1" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="psd" type="f1a62948:ProjectNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="build setup" type="c8890929:TasksNode$1" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="psd" type="f1a62948:ProjectNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="documentation" type="c8890929:TasksNode$1" />
               </path>
             </expand>
             <select />
@@ -73,7 +94,7 @@
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
     &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/cksgu/git/psd/libs&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/cksgu/git/psd-google&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
     &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
     &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
@@ -133,6 +154,27 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="psd [build]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="build" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
+    </configuration>
     <configuration name="psd [dependencies]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -157,6 +199,7 @@
     <recent_temporary>
       <list>
         <item itemvalue="Application.Main" />
+        <item itemvalue="Gradle.psd [build]" />
         <item itemvalue="Gradle.psd [dependencies]" />
       </list>
     </recent_temporary>
@@ -177,7 +220,13 @@
       <workItem from="1689760328508" duration="9194000" />
       <workItem from="1689838312647" duration="5853000" />
       <workItem from="1689844696036" duration="1558000" />
-      <workItem from="1689940401544" duration="7129000" />
+      <workItem from="1689940401544" duration="7880000" />
+      <workItem from="1690093197917" duration="2200000" />
+      <workItem from="1690185772147" duration="1802000" />
+      <workItem from="1690276273706" duration="1481000" />
+      <workItem from="1690283291351" duration="716000" />
+      <workItem from="1690452161290" duration="2449000" />
+      <workItem from="1690592091036" duration="1376000" />
     </task>
     <task id="LOCAL-00001" summary="psd layer channel 저장까지">
       <created>1689062129493</created>
@@ -228,7 +277,14 @@
       <option name="project" value="LOCAL" />
       <updated>1689845504862</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="preview 출력중 (오류 발생)">
+      <created>1689947594260</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1689947594260</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -264,7 +320,8 @@
     <MESSAGE value="이름 추출" />
     <MESSAGE value="레이어 이미지 체널 추출" />
     <MESSAGE value="출력 성공" />
-    <option name="LAST_COMMIT_MESSAGE" value="출력 성공" />
+    <MESSAGE value="preview 출력중 (오류 발생)" />
+    <option name="LAST_COMMIT_MESSAGE" value="preview 출력중 (오류 발생)" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand>

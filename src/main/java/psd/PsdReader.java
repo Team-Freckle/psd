@@ -172,10 +172,9 @@ public class PsdReader {
                     b = generateByteArray(n, 0);
                 if (a == null)
                     a = generateByteArray(n, 255);
-                BufferedImage image = makeRGBImage(layer.getRight() - layer.getLeft()
+                preview = makeRGBImage(layer.getRight() - layer.getLeft()
                         , layer.getBottom() - layer.getTop()
                         , r, g, b, a);
-                psdLayers[iLayerCount].setFrame(image);
             }
             System.out.println("bef : " + getStreamOffset());
             lineLen = null;
@@ -184,47 +183,50 @@ public class PsdReader {
                 jumpBytes(n);
             }
             jumpBytes(layerMaskInfoLen - getStreamOffset());
+            System.out.println(new String(r));
+            System.out.println(new String(g));
+            System.out.println(new String(b));
+            System.out.println(new String(a));
             System.out.println("aft : " + getStreamOffset());
         }
     }
 
     protected void readPreview() throws IOException {
-        short encoding = readShort();
-        if(encoding == 0) this.encoding = "raw";
-        else if(encoding == 1) this.encoding = "rle";
-        else if(encoding == 2) this.encoding = "zip";
-        else if(encoding == 3) this.encoding = "pzip";
+        System.out.println("perview bef : " + getStreamOffset());
+        boolean rle = readShort() == 1;
+        short[] lineLengths = null;
+        int height = psdHeader.getHeight();
+        if (rle) {
+            int nLines = height * psdHeader.getChannelCount();
+            lineLengths = new short[nLines];
 
-        System.out.println(getStreamOffset());
-        byte[] r = null, g = null, b = null, a = null;
-        for(int iChannelCount = 0; iChannelCount < psdHeader.getChannelCount(); iChannelCount++) {
-            switch (iChannelCount) {
-                case 0:
-                    r = readChannelImage(psdHeader.getWidth(), psdHeader.getHeight());
-                    break;
-                case 1:
-                    g = readChannelImage(psdHeader.getWidth(), psdHeader.getHeight());
-                    break;
-                case 2:
-                    b = readChannelImage(psdHeader.getWidth(), psdHeader.getHeight());
-                    break;
-                case 3:
-                    a = readChannelImage(psdHeader.getWidth(), psdHeader.getHeight());
-                    break;
-                default:
-                    readChannelImage(psdHeader.getWidth(), psdHeader.getHeight());
+            for (int i = 0; i < nLines; i++) {
+                lineLengths[i] = readShort();
             }
         }
-        int n = psdHeader.getWidth() * psdHeader.getHeight();
-        if (r == null)
-            r = generateByteArray(n, 0);
-        if (g == null)
-            g = generateByteArray(n, 0);
-        if (b == null)
-            b = generateByteArray(n, 0);
-        if (a == null)
-            a = generateByteArray(n, 255);
-        preview = makeRGBImage(psdHeader.getWidth(), psdHeader.getHeight(), r, g, b, a);
+
+        for (int channelNumber = 0; channelNumber < psdHeader.getChannelCount(); channelNumber++) {
+            int channelId = channelNumber == 3 ? -1 : channelNumber;
+
+            int width = psdHeader.getWidth();
+            byte[] data = new byte[width * height];
+            if (rle) {
+                byte[] s = new byte[width * 2];
+                int pos = 0;
+                int lineIndex = channelNumber * height;
+                for (int i = 0; i < height; i++) {
+                    int len = lineLengths[lineIndex++];
+                    readBytes(s, len);
+                    decodeRLE(s, 0, len, data, pos);
+                    pos += width;
+                }
+
+            } else {
+                data = readChannelImage(width, height);
+            }
+        }
+
+        System.out.println("perview aft : " + getStreamOffset());
     }
 
     protected byte[] readChannelImage(int width, int height) {
