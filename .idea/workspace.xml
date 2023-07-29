@@ -4,9 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9b47ab1c-3568-48e6-961f-b8bb7a56629a" name="변경" comment="preview 출력중 (오류 발생)">
+    <list default="true" id="9b47ab1c-3568-48e6-961f-b8bb7a56629a" name="변경" comment="preview 출력중 성공">
+      <change afterPath="$PROJECT_DIR$/src/main/java/ImageService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/psd/PsdReader.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/psd/PsdReader.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/output.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Main.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -81,6 +83,9 @@
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
   </component>
   <component name="ProjectId" id="2SPkSLCoc7ceAmELaOMOFVGGEDz" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
@@ -226,7 +231,7 @@
       <workItem from="1690276273706" duration="1481000" />
       <workItem from="1690283291351" duration="716000" />
       <workItem from="1690452161290" duration="2449000" />
-      <workItem from="1690592091036" duration="1376000" />
+      <workItem from="1690592091036" duration="3075000" />
     </task>
     <task id="LOCAL-00001" summary="psd layer channel 저장까지">
       <created>1689062129493</created>
@@ -284,7 +289,14 @@
       <option name="project" value="LOCAL" />
       <updated>1689947594260</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="preview 출력중 성공">
+      <created>1690593923745</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1690593923745</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -321,7 +333,8 @@
     <MESSAGE value="레이어 이미지 체널 추출" />
     <MESSAGE value="출력 성공" />
     <MESSAGE value="preview 출력중 (오류 발생)" />
-    <option name="LAST_COMMIT_MESSAGE" value="preview 출력중 (오류 발생)" />
+    <MESSAGE value="preview 출력중 성공" />
+    <option name="LAST_COMMIT_MESSAGE" value="preview 출력중 성공" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand>
