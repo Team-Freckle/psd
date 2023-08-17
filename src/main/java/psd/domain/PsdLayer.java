@@ -10,6 +10,8 @@ public class PsdLayer {
     private int bottom;
     private int left;
     private int right;
+    private int width;
+    private int height;
     private int channelCount;
     private int[] channelId;
     private int[] channelLine;

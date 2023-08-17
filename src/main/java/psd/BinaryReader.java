@@ -6,20 +6,27 @@ import java.io.InputStream;
 
 public class BinaryReader {
     protected BufferedInputStream input;
+    protected int inputLen;
 
-    public String getBinary() throws IOException {
+    public String getBinary(int start, int end) throws IOException {
         String moreBinary = "";
         int data;
-        int p = 1;
-        while ((data = input.read()) != -1) {
-            moreBinary += p++ + " : " + data + " " + (char) data + " " + "\n";
+        input.skip(start);
+
+        while (start++ < end) {
+            data = input.read();
+            moreBinary += getStreamOffset() + " : " + data + " " + (char) data + " " + "\n";
         }
         moreBinary += "-------------\n";
         return moreBinary;
     }
 
-    public void setInput(InputStream stream) {
+    public void setInput(InputStream stream) throws IOException {
         if (stream instanceof BufferedInputStream) input = (BufferedInputStream) stream;
         else input = new BufferedInputStream(stream);
+        inputLen = input.available();
+    }
+    protected int getStreamOffset() throws IOException {
+        return inputLen - input.available() + 1;
     }
 }
