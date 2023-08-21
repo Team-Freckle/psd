@@ -1,10 +1,11 @@
-package psd.domain;
+package psd.component;
 
 import lombok.Data;
 
 @Data
 public class PsdHeader {
-    private String name;
+    private Long idx;
+    private Long psdIdx;
     private int version;
     private int channelCount;
     private int height;

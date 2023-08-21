@@ -1,12 +1,11 @@
 import psd.BinaryReader;
-import psd.PsdException;
 import psd.PsdReader;
 
 import javax.imageio.ImageIO;
 import java.io.*;
 
 public class Main {
-    public static void main(String[]args) throws IOException, PsdException {
+    public static void main(String[]args) throws IOException {
         System.out.println("registering..");
         PsdReader psdReader = new PsdReader();
         BinaryReader binaryReader = new BinaryReader();
