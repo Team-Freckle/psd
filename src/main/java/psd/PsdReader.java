@@ -1,32 +1,26 @@
 package psd;
 
 import lombok.Data;
-import psd.domain.PsdHeader;
-import psd.domain.PsdLayer;
+import psd.component.PsdHeader;
+import psd.component.PsdLayer;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
-import java.rmi.server.ExportException;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 @Data
-public class PsdReader {
+public class PsdReader extends PsdEntity {
     protected BufferedInputStream input;
     protected int inputLen;
     protected int bufferLen;
-    protected PsdHeader psdHeader;
     protected int layerCount;
-    protected PsdLayer[] psdLayers;
     protected short[] lineLen;
     protected int iLine;
     protected String encoding;
-    protected BufferedImage preview;
     protected int layerMaskInfoLen;
 
     public PsdReader() {
@@ -45,23 +39,17 @@ public class PsdReader {
         setInput(stream);
     }
 
-    public void run() throws IOException, PsdException {
+    public void run() throws IOException {
         try {
-            System.out.println("file is " + inputLen + "byte!");
             readHeader();
-            System.out.println("header end " + getStreamOffset());
             readLayers();
-            System.out.println("layer info end " + getStreamOffset());
             if (layerCount == 0) {
                 makeDummyLayer();
             }
             readLayersImage();
-            System.out.println("layer image end " + getStreamOffset());
             readPreview();
-            System.out.println("preview end " + getStreamOffset());
         }
         catch (Exception e) {
-            System.out.println("err point : " + getStreamOffset());
             throw e;
             //throw new PsdException(e, getStreamOffset());
         }
@@ -115,11 +103,11 @@ public class PsdReader {
             }
             layer.setModeKey(readString(4));
             layer.setTransparency(readByte());
-            layer.setClipping(readByte() > 0);
+            layer.setClipping(readByte() > 0 ? 'Y' : 'N');
             int flag = readByte();
             if (flag != 0) {
-                layer.setProtectTransparency((flag & 0x01) == 1);
-                layer.setVision((flag & 0x02) >> 1 == 1);
+                layer.setProtectTransparency((flag & 0x01) == 1 ? 'Y' : 'N');
+                layer.setVision((flag & 0x02) >> 1 == 1 ? 'Y' : 'N');
             }
             jumpBytes(1);
             int dataFieldLen = readInt() + getStreamOffset();
@@ -180,7 +168,7 @@ public class PsdReader {
         }
         layer.setChannelId(channelID);
     }
-    public void readLayersImage() throws IOException, PsdException {
+    public void readLayersImage() throws IOException {
         for(int iLayerCount = 0; iLayerCount < layerCount; iLayerCount++) {
             PsdLayer layer = psdLayers[iLayerCount];
             byte[] r = null, g = null, b = null, a = null;
@@ -210,17 +198,15 @@ public class PsdReader {
             psdLayers[iLayerCount].setFrame(image);
         }
         jumpBytes(layerMaskInfoLen - getStreamOffset());
-        System.out.println("layer mask jump " + getStreamOffset());
     }
 
-    protected void readPreview() throws IOException, PsdException {
+    protected void readPreview() throws IOException {
         short encoding = readShort();
         if(encoding == 0) this.encoding = "raw";
         else if(encoding == 1) this.encoding = "rle";
         else if(encoding == 2) this.encoding = "zip";
         else if(encoding == 3) this.encoding = "pzip";
 
-        System.out.println(this.encoding);
         byte[] r = null, g = null, b = null, a = null;
 
         short[][] channelL = new short[psdHeader.getChannelCount()][];
@@ -252,7 +238,7 @@ public class PsdReader {
         preview = makeRGBImage(psdHeader.getWidth(), psdHeader.getHeight(), r, g, b, a);
     }
 
-    protected byte[] readChannelImage(int width, int height) throws IOException, PsdException {
+    protected byte[] readChannelImage(int width, int height) throws IOException {
         byte[] b = null;
         int size = width * height;
         short encoding = readShort();
@@ -274,7 +260,7 @@ public class PsdReader {
         return b;
     }
 
-    protected byte[] readLayerCompressedChannelImage(int width, int height) throws IOException, PsdException {
+    protected byte[] readLayerCompressedChannelImage(int width, int height) throws IOException {
         byte[] b = new byte[width * height];
         byte[] s = new byte[width * 2];
         int pos = 0;
@@ -314,14 +300,10 @@ public class PsdReader {
     }
 
     protected void readLineLen(int lineCount) throws IOException {
-        System.out.println("linelen start (" + lineCount + ") " + getStreamOffset());
         lineLen = new short[lineCount];
         for(int i = 0; i < lineCount; i++) {
             lineLen[i] = readShort();
         }
-        System.out.println("linelen " + getStreamOffset() + " " + Arrays.toString(lineLen));
-        System.out.println((lineLen[0] >> 8) & 0xFF);
-        System.out.println(lineLen[0] &0xFF);
         iLine = 0;
     }
 
@@ -382,26 +364,26 @@ public class PsdReader {
      * XByte 읽기
      * @return
      */
-    protected int readBytes(byte[] bytes, int n) throws IOException, PsdException {
+    protected int readBytes(byte[] bytes, int n) throws IOException {
         if (bytes == null)
             return 0;
         int r = 0;
         try {
             r = input.read(bytes, 0, n);
         } catch (IOException e) {
-            throw new PsdException(new Exception("file format error"), getStreamOffset());
+            throw new IOException(new Exception("file format error"));
         }
         if (r < n) {
-            throw new PsdException(new Exception("file format error"), getStreamOffset());
+            throw new IOException(new Exception("file format error"));
         }
         return r;
     }
 
 
-        /**
-         * 4Byte(int) 읽기
-         * @return
-         */
+    /**
+     * 4Byte(int) 읽기
+     * @return
+     */
     protected int readInt() {
         return (((((readByte() << 8) | readByte()) << 8) | readByte()) << 8) | readByte();
     }

@@ -1,4 +1,4 @@
-package psd.domain;
+package psd.component;
 
 import lombok.Data;
 
@@ -6,6 +6,8 @@ import java.awt.image.BufferedImage;
 
 @Data
 public class PsdLayer {
+    private Long idx;
+    private Long psdIdx;
     private int top;
     private int bottom;
     private int left;
@@ -19,17 +21,9 @@ public class PsdLayer {
     private String modeKey;
     private String name;
     private int transparency;
-    private boolean clipping;
-    private boolean protectTransparency;
-    private boolean vision;
-    private boolean getClipping() {
-        return clipping;
-    }
-    private boolean getProtectTransparency() {
-        return protectTransparency;
-    }
-    private boolean getVision() {
-        return vision;
-    }
+    private char clipping;
+    private char protectTransparency;
+    private char vision;
     private BufferedImage frame;
+    private String comment;
 }
