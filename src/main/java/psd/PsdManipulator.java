@@ -13,7 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 @Data
-public class PsdReader extends PsdEntity {
+public class PsdManipulator extends PsdEntity {
     protected BufferedInputStream input;
     protected int inputLen;
     protected int bufferLen;
@@ -23,7 +23,7 @@ public class PsdReader extends PsdEntity {
     protected String encoding;
     protected int layerMaskInfoLen;
 
-    public PsdReader() {
+    public PsdManipulator() {
         bufferLen = 0;
         layerMaskInfoLen = 0;
         psdHeader = new PsdHeader();

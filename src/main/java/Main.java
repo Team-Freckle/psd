@@ -1,5 +1,5 @@
 import psd.BinaryReader;
-import psd.PsdReader;
+import psd.PsdManipulator;
 
 import javax.imageio.ImageIO;
 import java.io.*;
@@ -7,7 +7,7 @@ import java.io.*;
 public class Main {
     public static void main(String[]args) throws IOException {
         System.out.println("registering..");
-        PsdReader psdReader = new PsdReader();
+        PsdManipulator psdManipulator = new PsdManipulator();
         BinaryReader binaryReader = new BinaryReader();
 
         System.out.println("importing..");
@@ -20,13 +20,13 @@ public class Main {
         bis = new BufferedInputStream(new FileInputStream("C:/Users/cksgu/Desktop/alt.psd"));
 
         System.out.println("psd running..");
-        psdReader.open(bis);
-        psdReader.run();
+        psdManipulator.open(bis);
+        psdManipulator.run();
 
         System.out.println("creating..");
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ImageIO.write(psdReader.getPreview(), "png", baos);
+        ImageIO.write(psdManipulator.getPreview(), "png", baos);
 
         try {
             // PNG 파일로 저장하고 싶은 경우
@@ -39,6 +39,6 @@ public class Main {
             e.printStackTrace();
         }
 
-        System.out.println(psdReader.toString());
+        System.out.println(psdManipulator.toString());
     }
 }
