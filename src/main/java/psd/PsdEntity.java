@@ -1,6 +1,7 @@
 package psd;
 
 import lombok.Data;
+import psd.Psd;
 import psd.component.PsdHeader;
 import psd.component.PsdLayer;
 

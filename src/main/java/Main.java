@@ -1,5 +1,6 @@
 import psd.BinaryReader;
-import psd.PsdManipulator;
+import psd.manipulator.PsdEditor;
+import psd.manipulator.PsdReader;
 
 import javax.imageio.ImageIO;
 import java.io.*;
@@ -7,7 +8,7 @@ import java.io.*;
 public class Main {
     public static void main(String[]args) throws IOException {
         System.out.println("registering..");
-        PsdManipulator psdManipulator = new PsdManipulator();
+        PsdEditor psdManipulator = new PsdEditor();
         BinaryReader binaryReader = new BinaryReader();
 
         System.out.println("importing..");
@@ -16,7 +17,7 @@ public class Main {
 
         System.out.println("binary running..");
         binaryReader.setInput(bis);
-        System.out.println(binaryReader.getBinary(200000, 230000));
+        System.out.println(binaryReader.getBinary(90, 300));
         bis = new BufferedInputStream(new FileInputStream("C:/Users/cksgu/Desktop/alt.psd"));
 
         System.out.println("psd running..");
@@ -28,6 +29,11 @@ public class Main {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ImageIO.write(psdManipulator.getPreview(), "png", baos);
 
+        System.out.println(psdManipulator.getDataInfo().toString());
+        System.out.println();
+
+        psdManipulator.addLayer(psdManipulator.getPsdLayers()[0]);
+
         try {
             // PNG 파일로 저장하고 싶은 경우
             FileOutputStream fos = new FileOutputStream("C:/Users/cksgu/Desktop/output.png");
@@ -38,7 +44,5 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        System.out.println(psdManipulator.toString());
     }
 }

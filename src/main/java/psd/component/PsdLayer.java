@@ -17,6 +17,7 @@ public class PsdLayer {
     private int channelCount;
     private int[] channelId;
     private int[] channelLine;
+    private int[] channelSize;
     private int channel;
     private String modeKey;
     private String name;

@@ -1,20 +1,19 @@
-package psd;
+package psd.manipulator;
 
 import lombok.Data;
+import psd.PsdEntity;
 import psd.component.PsdHeader;
 import psd.component.PsdLayer;
 import psd.component.PsdSectionDataInfo;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 @Data
-public class PsdManipulator extends PsdEntity {
+public class PsdReader extends PsdEntity {
     protected BufferedInputStream input;
     protected int inputLen;
     protected int layerCount;
@@ -24,7 +23,7 @@ public class PsdManipulator extends PsdEntity {
     protected int layerMaskInfoLen;
     protected PsdSectionDataInfo dataInfo;
 
-    public PsdManipulator() {
+    public PsdReader() {
         psdHeader = new PsdHeader();
         psdLayers = null;
         dataInfo = new PsdSectionDataInfo();
@@ -37,7 +36,6 @@ public class PsdManipulator extends PsdEntity {
     public void open(InputStream stream) throws IOException {
         setInput(stream);
     }
-
     public void run() throws IOException {
         try {
             readHeader();
@@ -53,6 +51,9 @@ public class PsdManipulator extends PsdEntity {
             //throw new PsdException(e, getStreamOffset());
         }
     }
+    protected void sliceSection() {
+
+    }
 
     public void readHeader() throws IOException {
         if (! readString(4).equals("8BPS")) {
@@ -66,6 +67,7 @@ public class PsdManipulator extends PsdEntity {
         psdHeader.setWidth(readInt());
         psdHeader.setChannelBitsDepth(readShort());
         psdHeader.setColorMode(getColorMode(readShort()));
+        dataInfo.setP_colorMod(getStreamOffset());
         dataInfo.setL_colorMod(readInt());
         jumpBytes(dataInfo.getL_colorMod());
         dataInfo.setP_imageResource(getStreamOffset());
@@ -97,11 +99,13 @@ public class PsdManipulator extends PsdEntity {
             layer.setWidth(layer.getRight() - layer.getLeft());
             layer.setChannelCount(readShort());
             int[] channelId = new int[layer.getChannelCount()];
+            int[] channelSize = new int[layer.getChannelCount()];
             for(int iLayerChannel = 0; iLayerChannel < layer.getChannelCount(); iLayerChannel++) {
                 channelId[iLayerChannel] = readShort();
-                int size = readInt();
+                channelSize[iLayerChannel] = readInt();
             }
             layer.setChannelId(channelId);
+            layer.setChannelSize(channelSize);
             if (!readString(4).equals("8BIM")) {
                 throw new RuntimeException("sign not match");
             }
@@ -176,6 +180,7 @@ public class PsdManipulator extends PsdEntity {
         layer.setChannelId(channelID);
     }
     public void readLayersImage() throws IOException {
+        dataInfo.setP_channelImageData(getStreamOffset());
         for(int iLayerCount = 0; iLayerCount < layerCount; iLayerCount++) {
             PsdLayer layer = psdLayers[iLayerCount];
             byte[] r = null, g = null, b = null, a = null;
@@ -208,6 +213,7 @@ public class PsdManipulator extends PsdEntity {
     }
 
     protected void readPreview() throws IOException {
+        dataInfo.setP_preview(getStreamOffset());
         short encoding = readShort();
         if(encoding == 0) this.encoding = "raw";
         else if(encoding == 1) this.encoding = "rle";
