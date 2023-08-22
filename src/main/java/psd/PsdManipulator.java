@@ -3,6 +3,7 @@ package psd;
 import lombok.Data;
 import psd.component.PsdHeader;
 import psd.component.PsdLayer;
+import psd.component.PsdSectionDataInfo;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
@@ -16,19 +17,17 @@ import java.util.ArrayList;
 public class PsdManipulator extends PsdEntity {
     protected BufferedInputStream input;
     protected int inputLen;
-    protected int bufferLen;
     protected int layerCount;
     protected short[] lineLen;
     protected int iLine;
     protected String encoding;
     protected int layerMaskInfoLen;
+    protected PsdSectionDataInfo dataInfo;
 
     public PsdManipulator() {
-        bufferLen = 0;
-        layerMaskInfoLen = 0;
         psdHeader = new PsdHeader();
-        layerCount = 0;
         psdLayers = null;
+        dataInfo = new PsdSectionDataInfo();
     }
 
     /**
@@ -67,23 +66,28 @@ public class PsdManipulator extends PsdEntity {
         psdHeader.setWidth(readInt());
         psdHeader.setChannelBitsDepth(readShort());
         psdHeader.setColorMode(getColorMode(readShort()));
-        psdHeader.setColorModeLen(readInt());
-        jumpBytes(psdHeader.getColorModeLen());
-        psdHeader.setImageResourcesLen(readInt());
-        jumpBytes(psdHeader.getImageResourcesLen());
+        dataInfo.setL_colorMod(readInt());
+        jumpBytes(dataInfo.getL_colorMod());
+        dataInfo.setP_imageResource(getStreamOffset());
+        dataInfo.setL_imageResource(readInt());
+        jumpBytes(dataInfo.getL_imageResource());
     }
 
     public void readLayers() throws IOException {
-        bufferLen = readInt();
-        layerMaskInfoLen = getStreamOffset() + bufferLen;
-        if(bufferLen < 0) return;
-        final int layerInfoLen = readInt();
+        dataInfo.setP_layerMaskInfo(getStreamOffset());
+        dataInfo.setL_layerMaskInfo(readInt());
+        layerMaskInfoLen = getStreamOffset() + dataInfo.getL_layerMaskInfo();
+        if(dataInfo.getL_layerMaskInfo() < 0) return;
+        dataInfo.setL_layerInfo(readInt());
         layerCount = readShort();
+        int[] L_layerRecord = new int[layerCount];
+        int[] P_layerRecord = new int[layerCount];
 
         if(layerCount > 0) {
             psdLayers = new PsdLayer[layerCount];
         }
         for(int iLayerCount = 0; iLayerCount < layerCount; iLayerCount++) {
+            P_layerRecord[iLayerCount] = getStreamOffset();
             PsdLayer layer = new PsdLayer();
             layer.setTop(readInt());
             layer.setLeft(readInt());
@@ -127,8 +131,11 @@ public class PsdManipulator extends PsdEntity {
                 layer = readMoreLayerInfo(layer, readString(4), readInt());
             }
 
+            L_layerRecord[iLayerCount] = getStreamOffset() - P_layerRecord[iLayerCount];
             psdLayers[iLayerCount] = layer;
         }
+        dataInfo.setP_layerRecord(P_layerRecord);
+        dataInfo.setL_layerRecord(L_layerRecord);
     }
 
     protected PsdLayer readMoreLayerInfo(PsdLayer layer, String key, int len) {
@@ -478,13 +485,11 @@ public class PsdManipulator extends PsdEntity {
     protected void init() throws IOException {
         input.close();
         inputLen = input.available();
-        bufferLen = 0;
         psdHeader = null;
-        layerCount = 0;
         psdLayers = null;
     }
     protected int getStreamOffset() throws IOException {
-        return inputLen - input.available() + 1;
+        return inputLen - input.available();
     }
 
     @Override
