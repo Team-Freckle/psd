@@ -1,5 +1,7 @@
 package pcot.psd.entity;
 
+import java.util.Arrays;
+
 public class PsdLayer {
     protected int top;
     protected int bottom;
@@ -80,5 +82,28 @@ public class PsdLayer {
 
     public char getFolder() {
         return folder;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (PsdLayer.class != o.getClass()) return false;
+
+        PsdLayer p = (PsdLayer) o;
+        return this.top == p.top
+                && this.bottom == p.bottom
+                && this.left == p.left
+                && this.right == p.right
+                && this.width == p.width
+                && this.height == p.height
+                && this.channelCount == p.channelCount
+                && Arrays.equals(this.channelId, p.channelId)
+                && this.modeKey.equals(p.modeKey)
+                && this.name.equals(p.name)
+                && this.transparency == p.transparency
+                && this.clipping == p.clipping
+                && this.protectTransparency == p.protectTransparency
+                && this.vision == p.vision
+                && this.folder == p.folder
+                && this.frame.equals(p.frame);
     }
 }

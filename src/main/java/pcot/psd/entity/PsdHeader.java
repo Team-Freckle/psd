@@ -41,4 +41,19 @@ public class PsdHeader {
     public int getImageResourcesLen() {
         return imageResourcesLen;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (PsdHeader.class != o.getClass()) return false;
+
+        PsdHeader p = (PsdHeader) o;
+        return this.version == p.version
+                && this.channelCount == p.channelCount
+                && this.height == p.height
+                && this.width == p.width
+                && this.channelBitsDepth == p.channelBitsDepth
+                && this.colorMode.equals(p.colorMode)
+                && this.colorModeLen == p.colorModeLen
+                && this.imageResourcesLen == p.imageResourcesLen;
+    }
 }
