@@ -1,6 +1,5 @@
 import psd.BinaryReader;
-import psd.manipulator.PsdEditor;
-import psd.manipulator.PsdReader;
+import psd.PsdReader;
 
 import javax.imageio.ImageIO;
 import java.io.*;
@@ -8,17 +7,17 @@ import java.io.*;
 public class Main {
     public static void main(String[]args) throws IOException {
         System.out.println("registering..");
-        PsdEditor psdManipulator = new PsdEditor();
+        PsdReader psdManipulator = new PsdReader();
         BinaryReader binaryReader = new BinaryReader();
 
         System.out.println("importing..");
-        FileInputStream fis = new FileInputStream("C:/Users/cksgu/Desktop/alt.psd");
+        FileInputStream fis = new FileInputStream("C:/Users/cksgu/Desktop/test.psd");
         BufferedInputStream bis = new BufferedInputStream(fis);
 
         System.out.println("binary running..");
         binaryReader.setInput(bis);
         System.out.println(binaryReader.getBinary(90, 300));
-        bis = new BufferedInputStream(new FileInputStream("C:/Users/cksgu/Desktop/alt.psd"));
+        bis = new BufferedInputStream(new FileInputStream("C:/Users/cksgu/Desktop/test.psd"));
 
         System.out.println("psd running..");
         psdManipulator.open(bis);
@@ -29,10 +28,7 @@ public class Main {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ImageIO.write(psdManipulator.getPreview(), "png", baos);
 
-        System.out.println(psdManipulator.getDataInfo().toString());
-        System.out.println();
-
-        psdManipulator.addLayer(psdManipulator.getPsdLayers()[0]);
+        System.out.println(psdManipulator.toString());
 
         try {
             // PNG 파일로 저장하고 싶은 경우

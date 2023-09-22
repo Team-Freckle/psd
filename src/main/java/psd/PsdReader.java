@@ -1,14 +1,14 @@
-package psd.manipulator;
+package psd;
 
 import lombok.Data;
-import psd.PsdEntity;
 import psd.component.PsdHeader;
 import psd.component.PsdLayer;
-import psd.component.PsdSectionDataInfo;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
@@ -16,17 +16,19 @@ import java.util.ArrayList;
 public class PsdReader extends PsdEntity {
     protected BufferedInputStream input;
     protected int inputLen;
+    protected int bufferLen;
     protected int layerCount;
     protected short[] lineLen;
     protected int iLine;
     protected String encoding;
     protected int layerMaskInfoLen;
-    protected PsdSectionDataInfo dataInfo;
 
     public PsdReader() {
+        bufferLen = 0;
+        layerMaskInfoLen = 0;
         psdHeader = new PsdHeader();
+        layerCount = 0;
         psdLayers = null;
-        dataInfo = new PsdSectionDataInfo();
     }
 
     /**
@@ -36,6 +38,7 @@ public class PsdReader extends PsdEntity {
     public void open(InputStream stream) throws IOException {
         setInput(stream);
     }
+
     public void run() throws IOException {
         try {
             readHeader();
@@ -51,9 +54,6 @@ public class PsdReader extends PsdEntity {
             //throw new PsdException(e, getStreamOffset());
         }
     }
-    protected void sliceSection() {
-
-    }
 
     public void readHeader() throws IOException {
         if (! readString(4).equals("8BPS")) {
@@ -67,29 +67,23 @@ public class PsdReader extends PsdEntity {
         psdHeader.setWidth(readInt());
         psdHeader.setChannelBitsDepth(readShort());
         psdHeader.setColorMode(getColorMode(readShort()));
-        dataInfo.setP_colorMod(getStreamOffset());
-        dataInfo.setL_colorMod(readInt());
-        jumpBytes(dataInfo.getL_colorMod());
-        dataInfo.setP_imageResource(getStreamOffset());
-        dataInfo.setL_imageResource(readInt());
-        jumpBytes(dataInfo.getL_imageResource());
+        psdHeader.setColorModeLen(readInt());
+        jumpBytes(psdHeader.getColorModeLen());
+        psdHeader.setImageResourcesLen(readInt());
+        jumpBytes(psdHeader.getImageResourcesLen());
     }
 
     public void readLayers() throws IOException {
-        dataInfo.setP_layerMaskInfo(getStreamOffset());
-        dataInfo.setL_layerMaskInfo(readInt());
-        layerMaskInfoLen = getStreamOffset() + dataInfo.getL_layerMaskInfo();
-        if(dataInfo.getL_layerMaskInfo() < 0) return;
-        dataInfo.setL_layerInfo(readInt());
+        bufferLen = readInt();
+        layerMaskInfoLen = getStreamOffset() + bufferLen;
+        if(bufferLen < 0) return;
+        final int layerInfoLen = readInt();
         layerCount = readShort();
-        int[] L_layerRecord = new int[layerCount];
-        int[] P_layerRecord = new int[layerCount];
 
         if(layerCount > 0) {
             psdLayers = new PsdLayer[layerCount];
         }
         for(int iLayerCount = 0; iLayerCount < layerCount; iLayerCount++) {
-            P_layerRecord[iLayerCount] = getStreamOffset();
             PsdLayer layer = new PsdLayer();
             layer.setTop(readInt());
             layer.setLeft(readInt());
@@ -99,24 +93,22 @@ public class PsdReader extends PsdEntity {
             layer.setWidth(layer.getRight() - layer.getLeft());
             layer.setChannelCount(readShort());
             int[] channelId = new int[layer.getChannelCount()];
-            int[] channelSize = new int[layer.getChannelCount()];
             for(int iLayerChannel = 0; iLayerChannel < layer.getChannelCount(); iLayerChannel++) {
                 channelId[iLayerChannel] = readShort();
-                channelSize[iLayerChannel] = readInt();
+                int size = readInt();
             }
             layer.setChannelId(channelId);
-            layer.setChannelSize(channelSize);
             if (!readString(4).equals("8BIM")) {
                 throw new RuntimeException("sign not match");
             }
             layer.setModeKey(readString(4));
             layer.setTransparency(readByte());
             layer.setClipping(readByte() > 0 ? 'Y' : 'N');
+
             int flag = readByte();
-            if (flag != 0) {
-                layer.setProtectTransparency((flag & 0x01) == 1 ? 'Y' : 'N');
-                layer.setVision((flag & 0x02) >> 1 == 1 ? 'Y' : 'N');
-            }
+            layer.setProtectTransparency((flag & 0x01) == 1 ? 'Y' : 'N');
+            layer.setVision((flag & 0x02) >> 1 == 1 ? 'N' : 'Y');
+
             jumpBytes(1);
             int dataFieldLen = readInt() + getStreamOffset();
             int layerMaskAdjustmentLen = readInt();
@@ -135,11 +127,8 @@ public class PsdReader extends PsdEntity {
                 layer = readMoreLayerInfo(layer, readString(4), readInt());
             }
 
-            L_layerRecord[iLayerCount] = getStreamOffset() - P_layerRecord[iLayerCount];
             psdLayers[iLayerCount] = layer;
         }
-        dataInfo.setP_layerRecord(P_layerRecord);
-        dataInfo.setL_layerRecord(L_layerRecord);
     }
 
     protected PsdLayer readMoreLayerInfo(PsdLayer layer, String key, int len) {
@@ -180,9 +169,12 @@ public class PsdReader extends PsdEntity {
         layer.setChannelId(channelID);
     }
     public void readLayersImage() throws IOException {
-        dataInfo.setP_channelImageData(getStreamOffset());
         for(int iLayerCount = 0; iLayerCount < layerCount; iLayerCount++) {
             PsdLayer layer = psdLayers[iLayerCount];
+            if(layer.getWidth() <= 0 || layer.getHeight() <= 0) {
+                continue;
+            }
+
             byte[] r = null, g = null, b = null, a = null;
             for(int iChannelCount = 0; iChannelCount < layer.getChannelCount(); iChannelCount++) {
                 int id = layer.getChannelId()[iChannelCount];
@@ -213,7 +205,6 @@ public class PsdReader extends PsdEntity {
     }
 
     protected void readPreview() throws IOException {
-        dataInfo.setP_preview(getStreamOffset());
         short encoding = readShort();
         if(encoding == 0) this.encoding = "raw";
         else if(encoding == 1) this.encoding = "rle";
@@ -491,11 +482,13 @@ public class PsdReader extends PsdEntity {
     protected void init() throws IOException {
         input.close();
         inputLen = input.available();
+        bufferLen = 0;
         psdHeader = null;
+        layerCount = 0;
         psdLayers = null;
     }
     protected int getStreamOffset() throws IOException {
-        return inputLen - input.available();
+        return inputLen - input.available() + 1;
     }
 
     @Override
