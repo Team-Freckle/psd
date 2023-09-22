@@ -26,4 +26,5 @@ public class PsdLayer {
     private char vision;
     private BufferedImage frame;
     private String comment;
+    private char folder;
 }

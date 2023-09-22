@@ -115,9 +115,12 @@ public class PsdReader extends PsdEntity {
             jumpBytes(layerMaskAdjustmentLen);
             int layerBlendingRangesLen = readInt();
             jumpBytes(layerBlendingRangesLen);
+
             int nameLen = readByte();
-            if((nameLen + 1) % 4 > 0) nameLen += 4 - (nameLen + 1) % 4;
-            jumpBytes(nameLen);
+            layer.setName(readString(nameLen));
+            if(layer.getName().equals("</Layer set>")) layer.setFolder('<');
+
+            if((nameLen + 1) % 4 > 0) jumpBytes(4 - (nameLen + 1) % 4);
 
             while (getStreamOffset() < dataFieldLen) {
                 String sign = readString(4);
@@ -136,6 +139,20 @@ public class PsdReader extends PsdEntity {
             case "luni":
                 layer.setName(readUtf16(len).substring(2));
                 break;
+
+            case "lsct":
+                int type = readInt();
+                if (type == 1 || type == 2) {
+                    layer.setFolder('>');
+                }
+                if (len >= 12) {
+                    jumpBytes(8);
+                }
+                if (len >= 16) {
+                    jumpBytes(4);
+                }
+                break;
+
             default:
                 jumpBytes(len);
         }
