@@ -1,10 +1,9 @@
-package psd;
+package pcot.psd.entity;
 
 import lombok.Data;
-import psd.component.PsdHeader;
-import psd.component.PsdLayer;
-
-import java.awt.image.BufferedImage;
+import pcot.psd.entity.buffered.PcotBufferedImage;
+import pcot.psd.entity.component.PsdHeader;
+import pcot.psd.entity.component.PsdLayer;
 import java.util.List;
 
 @Data
@@ -12,7 +11,7 @@ public class PsdEntity {
     protected Psd psd;
     protected PsdHeader psdHeader;
     protected PsdLayer[] psdLayers;
-    protected BufferedImage preview;
+    protected PcotBufferedImage preview;
 
     public void setPsdLayers(List<PsdLayer> psdLayers) {
         PsdLayer[] layers = new PsdLayer[psdLayers.size()];

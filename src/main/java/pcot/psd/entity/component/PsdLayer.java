@@ -1,6 +1,7 @@
-package psd.component;
+package pcot.psd.entity.component;
 
 import lombok.Data;
+import pcot.psd.entity.buffered.PcotBufferedImage;
 
 import java.awt.image.BufferedImage;
 
@@ -24,7 +25,7 @@ public class PsdLayer {
     private char clipping;
     private char protectTransparency;
     private char vision;
-    private BufferedImage frame;
+    private PcotBufferedImage frame;
     private String comment;
     private char folder;
 }

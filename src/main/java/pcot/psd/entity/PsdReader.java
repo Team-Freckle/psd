@@ -1,8 +1,9 @@
-package psd;
+package pcot.psd.entity;
 
 import lombok.Data;
-import psd.component.PsdHeader;
-import psd.component.PsdLayer;
+import pcot.psd.entity.buffered.PcotBufferedImage;
+import pcot.psd.entity.component.PsdHeader;
+import pcot.psd.entity.component.PsdLayer;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
@@ -213,7 +214,7 @@ public class PsdReader extends PsdEntity {
             if (a == null)
                 a = generateByteArray(n, 255);
 
-            BufferedImage image = makeRGBImage(layer.getWidth()
+            PcotBufferedImage image = makeRGBImage(layer.getWidth()
                     , layer.getHeight()
                     , r, g, b, a);
             psdLayers[iLayerCount].setFrame(image);
@@ -328,8 +329,8 @@ public class PsdReader extends PsdEntity {
         iLine = 0;
     }
 
-    protected BufferedImage makeRGBImage(int width, int height, byte[] r, byte[] g, byte[] b, byte[] a) {
-        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+    protected PcotBufferedImage makeRGBImage(int width, int height, byte[] r, byte[] g, byte[] b, byte[] a) {
+        PcotBufferedImage image = new PcotBufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         int[] data = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
         int n = width * height;
         int j = 0;
