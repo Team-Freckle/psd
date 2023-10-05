@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="pcot-psd:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/pcot_psd_jar</output-path>
+    <root id="archive" name="psd.jar">
+      <element id="extracted-dir" path="$PROJECT_DIR$/libs/jdeli-trial.jar" path-in-jar="/" />
+      <element id="module-output" name="psd.main" />
+    </root>
+  </artifact>
+</component>

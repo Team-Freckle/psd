@@ -1,4 +1,4 @@
-package psd.component;
+package pcot.psd.entity.component;
 
 import lombok.Data;
 
