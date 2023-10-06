@@ -6,19 +6,19 @@ public class PsdEntity {
     protected PsdLayer[] psdLayers;
     protected PcotBufferedImage preview;
 
-    public void setPsd(Psd psd) {
-        this.psd = psd;
+    public Psd getPsd() {
+        return psd;
     }
 
-    public void setPsdHeader(PsdHeader psdHeader) {
-        this.psdHeader = psdHeader;
+    public PsdHeader getPsdHeader() {
+        return psdHeader;
     }
 
-    public void setPsdLayers(PsdLayer[] psdLayers) {
-        this.psdLayers = psdLayers;
+    public PsdLayer[] getPsdLayers() {
+        return psdLayers;
     }
 
-    public void setPreview(PcotBufferedImage preview) {
-        this.preview = preview;
+    public PcotBufferedImage getPreview() {
+        return preview;
     }
 }
