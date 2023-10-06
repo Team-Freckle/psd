@@ -1,4 +1,4 @@
-package pcot.psd.entity.buffered;
+package pcot.psd.entity;
 
 public enum ImageType {
     PNG, JPEG

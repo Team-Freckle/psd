@@ -1,6 +1,5 @@
 package pcot.psd;
 
-import pcot.psd.entity.Psd;
 import pcot.psd.entity.PsdEntity;
 import pcot.psd.entity.PsdReader;
 import java.io.*;

@@ -1,10 +1,5 @@
 package pcot.psd.entity;
 
-import lombok.Data;
-import pcot.psd.entity.buffered.PcotBufferedImage;
-import pcot.psd.entity.component.PsdHeader;
-import pcot.psd.entity.component.PsdLayer;
-
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.io.BufferedInputStream;
@@ -13,7 +8,6 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
-@Data
 public class PsdReader extends PsdEntity {
     protected BufferedInputStream input;
     protected int inputLen;
@@ -56,25 +50,25 @@ public class PsdReader extends PsdEntity {
         }
     }
 
-    public void readHeader() throws IOException {
+    protected void readHeader() throws IOException {
         if (! readString(4).equals("8BPS")) {
             throw new RuntimeException("Signature not match");
         }
 
-        psdHeader.setVersion(readShort());
+        psdHeader.version = readShort();
         jumpBytes(6);
-        psdHeader.setChannelCount(readShort());
-        psdHeader.setHeight(readInt());
-        psdHeader.setWidth(readInt());
-        psdHeader.setChannelBitsDepth(readShort());
-        psdHeader.setColorMode(getColorMode(readShort()));
-        psdHeader.setColorModeLen(readInt());
-        jumpBytes(psdHeader.getColorModeLen());
-        psdHeader.setImageResourcesLen(readInt());
-        jumpBytes(psdHeader.getImageResourcesLen());
+        psdHeader.channelCount = readShort();
+        psdHeader.height = readInt();
+        psdHeader.width = readInt();
+        psdHeader.channelBitsDepth = readShort();
+        psdHeader.colorMode = getColorMode(readShort());
+        psdHeader.colorModeLen = readInt();
+        jumpBytes(psdHeader.colorModeLen);
+        psdHeader.imageResourcesLen = readInt();
+        jumpBytes(psdHeader.imageResourcesLen);
     }
 
-    public void readLayers() throws IOException {
+    protected void readLayers() throws IOException {
         bufferLen = readInt();
         layerMaskInfoLen = getStreamOffset() + bufferLen;
         if(bufferLen < 0) return;
@@ -86,29 +80,29 @@ public class PsdReader extends PsdEntity {
         }
         for(int iLayerCount = 0; iLayerCount < layerCount; iLayerCount++) {
             PsdLayer layer = new PsdLayer();
-            layer.setTop(readInt());
-            layer.setLeft(readInt());
-            layer.setBottom(readInt());
-            layer.setRight(readInt());
-            layer.setHeight(layer.getBottom() - layer.getTop());
-            layer.setWidth(layer.getRight() - layer.getLeft());
-            layer.setChannelCount(readShort());
-            int[] channelId = new int[layer.getChannelCount()];
-            for(int iLayerChannel = 0; iLayerChannel < layer.getChannelCount(); iLayerChannel++) {
+            layer.top = readInt();
+            layer.left = readInt();
+            layer.bottom = readInt();
+            layer.right = readInt();
+            layer.height = layer.bottom - layer.top;
+            layer.width = layer.right - layer.left;
+            layer.channelCount = readShort();
+            int[] channelId = new int[layer.channelCount];
+            for(int iLayerChannel = 0; iLayerChannel < layer.channelCount; iLayerChannel++) {
                 channelId[iLayerChannel] = readShort();
                 int size = readInt();
             }
-            layer.setChannelId(channelId);
+            layer.channelId = channelId;
             if (!readString(4).equals("8BIM")) {
                 throw new RuntimeException("sign not match");
             }
-            layer.setModeKey(readString(4));
-            layer.setTransparency(readByte());
-            layer.setClipping(readByte() > 0 ? 'Y' : 'N');
+            layer.modeKey = readString(4);
+            layer.transparency = readByte();
+            layer.clipping = readByte() > 0 ? 'Y' : 'N';
 
             int flag = readByte();
-            layer.setProtectTransparency((flag & 0x01) == 1 ? 'Y' : 'N');
-            layer.setVision((flag & 0x02) >> 1 == 1 ? 'N' : 'Y');
+            layer.protectTransparency = (flag & 0x01) == 1 ? 'Y' : 'N';
+            layer.vision = (flag & 0x02) >> 1 == 1 ? 'N' : 'Y';
 
             jumpBytes(1);
             int dataFieldLen = readInt() + getStreamOffset();
@@ -118,8 +112,8 @@ public class PsdReader extends PsdEntity {
             jumpBytes(layerBlendingRangesLen);
 
             int nameLen = readByte();
-            layer.setName(readString(nameLen));
-            if(layer.getName().equals("</Layer set>")) layer.setFolder('<');
+            layer.name = readString(nameLen);
+            if(layer.name.equals("</Layer set>")) layer.folder = '<';
 
             if((nameLen + 1) % 4 > 0) jumpBytes(4 - (nameLen + 1) % 4);
 
@@ -138,13 +132,13 @@ public class PsdReader extends PsdEntity {
     protected PsdLayer readMoreLayerInfo(PsdLayer layer, String key, int len) {
         switch (key) {
             case "luni":
-                layer.setName(readUtf16(len).substring(2));
+                layer.name = readUtf16(len).substring(2);
                 break;
 
             case "lsct":
                 int type = readInt();
                 if (type == 1 || type == 2) {
-                    layer.setFolder('>');
+                    layer.folder = '>';
                 }
                 if (len >= 12) {
                     jumpBytes(8);
@@ -166,45 +160,45 @@ public class PsdReader extends PsdEntity {
         psdLayers = new PsdLayer[1];
         PsdLayer layer = new PsdLayer();
         psdLayers[0] = layer;
-        layer.setLeft(0);
-        layer.setRight(psdHeader.getHeight());
-        layer.setTop(0);
-        layer.setBottom(psdHeader.getWidth());
-        int nc = Math.min(psdHeader.getChannelCount(), 4);
+        layer.left = 0;
+        layer.right = psdHeader.height;
+        layer.top = 0;
+        layer.bottom = psdHeader.width;
+        int nc = Math.min(psdHeader.channelCount, 4);
         if (encoding.equals("rle")) {
             // get list of rle encoded line lengths for all channels
-            readLineLen(layer.getTop() * nc);
+            readLineLen(layer.height * nc);
         }
-        layer.setChannelCount(nc);
-        layer.setChannelId(new int[nc]);
-        int[] channelID = layer.getChannelId();
+        layer.channelCount = nc;
+        layer.channelId = new int[nc];
+        int[] channelID = layer.channelId;
         for (int i = 0; i < nc; i++) {
             int id = i;
             if (i == 3)
                 id = -1;
             channelID[i] = id;
         }
-        layer.setChannelId(channelID);
+        layer.channelId = channelID;
     }
-    public void readLayersImage() throws IOException {
+    protected void readLayersImage() throws IOException {
         for(int iLayerCount = 0; iLayerCount < layerCount; iLayerCount++) {
             PsdLayer layer = psdLayers[iLayerCount];
-            if(layer.getWidth() <= 0 || layer.getHeight() <= 0) {
+            if(layer.width <= 0 || layer.height <= 0) {
                 continue;
             }
 
             byte[] r = null, g = null, b = null, a = null;
-            for(int iChannelCount = 0; iChannelCount < layer.getChannelCount(); iChannelCount++) {
-                int id = layer.getChannelId()[iChannelCount];
+            for(int iChannelCount = 0; iChannelCount < layer.channelCount; iChannelCount++) {
+                int id = layer.channelId[iChannelCount];
                 switch (id) {
-                    case 0 -> r = readChannelImage(layer.getWidth(), layer.getHeight());
-                    case 1 -> g = readChannelImage(layer.getWidth(), layer.getHeight());
-                    case 2 -> b = readChannelImage(layer.getWidth(), layer.getHeight());
-                    case -1 -> a = readChannelImage(layer.getWidth(), layer.getHeight());
-                    default -> readChannelImage(layer.getWidth(), layer.getHeight());
+                    case 0 -> r = readChannelImage(layer.width, layer.height);
+                    case 1 -> g = readChannelImage(layer.width, layer.height);
+                    case 2 -> b = readChannelImage(layer.width, layer.height);
+                    case -1 -> a = readChannelImage(layer.width, layer.height);
+                    default -> readChannelImage(layer.width, layer.height);
                 }
             }
-            int n = layer.getWidth() * layer.getHeight();
+            int n = layer.width * layer.height;
             if (r == null)
                 r = generateByteArray(n, 0);
             if (g == null)
@@ -214,10 +208,9 @@ public class PsdReader extends PsdEntity {
             if (a == null)
                 a = generateByteArray(n, 255);
 
-            PcotBufferedImage image = makeRGBImage(layer.getWidth()
-                    , layer.getHeight()
+            psdLayers[iLayerCount].frame = makeRGBImage(layer.width
+                    , layer.height
                     , r, g, b, a);
-            psdLayers[iLayerCount].setFrame(image);
         }
         jumpBytes(layerMaskInfoLen - getStreamOffset());
     }
@@ -231,24 +224,24 @@ public class PsdReader extends PsdEntity {
 
         byte[] r = null, g = null, b = null, a = null;
 
-        short[][] channelL = new short[psdHeader.getChannelCount()][];
-        for(int iChannelCount = 0; iChannelCount < psdHeader.getChannelCount(); iChannelCount++) {
-            readLineLen(psdHeader.getHeight());
+        short[][] channelL = new short[psdHeader.channelCount][];
+        for(int iChannelCount = 0; iChannelCount < psdHeader.channelCount; iChannelCount++) {
+            readLineLen(psdHeader.height);
             channelL[iChannelCount] = lineLen;
         }
-        for(int iChannelCount = 0; iChannelCount < psdHeader.getChannelCount(); iChannelCount++) {
+        for(int iChannelCount = 0; iChannelCount < psdHeader.channelCount; iChannelCount++) {
             lineLen = channelL[iChannelCount];
             iLine = 0;
 
             switch (iChannelCount) {
-                case 0 -> r = readLayerCompressedChannelImage(psdHeader.getWidth(), psdHeader.getHeight());
-                case 1 -> g = readLayerCompressedChannelImage(psdHeader.getWidth(), psdHeader.getHeight());
-                case 2 -> b = readLayerCompressedChannelImage(psdHeader.getWidth(), psdHeader.getHeight());
-                case 3 -> a = readLayerCompressedChannelImage(psdHeader.getWidth(), psdHeader.getHeight());
-                default -> readLayerCompressedChannelImage(psdHeader.getWidth(), psdHeader.getHeight());
+                case 0 -> r = readLayerCompressedChannelImage(psdHeader.width, psdHeader.height);
+                case 1 -> g = readLayerCompressedChannelImage(psdHeader.width, psdHeader.height);
+                case 2 -> b = readLayerCompressedChannelImage(psdHeader.width, psdHeader.height);
+                case 3 -> a = readLayerCompressedChannelImage(psdHeader.width, psdHeader.height);
+                default -> readLayerCompressedChannelImage(psdHeader.width, psdHeader.height);
             }
         }
-        int n = psdHeader.getWidth() * psdHeader.getHeight();
+        int n = psdHeader.width * psdHeader.height;
         if (r == null)
             r = generateByteArray(n, 0);
         if (g == null)
@@ -257,7 +250,7 @@ public class PsdReader extends PsdEntity {
             b = generateByteArray(n, 0);
         if (a == null)
             a = generateByteArray(n, 255);
-        preview = makeRGBImage(psdHeader.getWidth(), psdHeader.getHeight(), r, g, b, a);
+        preview = makeRGBImage(psdHeader.width, psdHeader.height, r, g, b, a);
     }
 
     protected byte[] readChannelImage(int width, int height) throws IOException {

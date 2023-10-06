@@ -1,4 +1,4 @@
-package pcot.psd.entity.buffered;
+package pcot.psd.entity;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
