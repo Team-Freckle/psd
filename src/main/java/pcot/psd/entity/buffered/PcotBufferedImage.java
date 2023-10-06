@@ -43,7 +43,27 @@ public class PcotBufferedImage extends BufferedImage {
                 throw new IOException("File already exists");
             }
 
-            ImageIO.write(this, format, outputFile);
+            if (format.equals("jpg")) {
+                int width = this.getWidth();
+                int height = this.getHeight();
+                BufferedImage rgb = new BufferedImage(
+                        width
+                        , height
+                        , BufferedImage.TYPE_INT_RGB
+                );
+                rgb.createGraphics().drawImage(
+                        this
+                        , 0
+                        , 0
+                        , width
+                        , height
+                        , null
+                );
+                ImageIO.write(rgb, format, outputFile);
+            }
+            else {
+                ImageIO.write(this, format, outputFile);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
