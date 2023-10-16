@@ -14,10 +14,9 @@ public class Psd {
 
     @Override
     public boolean equals(Object o) {
-        if (Psd.class != o.getClass()) return false;
+        if (!(o instanceof Psd p))
+            return false;
 
-        Psd p = (Psd) o;
-        return this.name.equals(p.name)
-                && this.size == p.size;
+        return this.name.equals(p.name);
     }
 }

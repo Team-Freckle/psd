@@ -86,9 +86,9 @@ public class PsdLayer {
 
     @Override
     public boolean equals(Object o) {
-        if (PsdLayer.class != o.getClass()) return false;
+        if (!(o instanceof PsdLayer p))
+            return false;
 
-        PsdLayer p = (PsdLayer) o;
         return this.top == p.top
                 && this.bottom == p.bottom
                 && this.left == p.left
@@ -104,6 +104,6 @@ public class PsdLayer {
                 && this.protectTransparency == p.protectTransparency
                 && this.vision == p.vision
                 && this.folder == p.folder
-                && this.frame.equals(p.frame);
+                && (this.frame == null || p.frame == null || (this.frame.equals(p.frame)));
     }
 }

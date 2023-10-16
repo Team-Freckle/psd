@@ -26,12 +26,12 @@ public class PsdEntity {
 
     @Override
     public boolean equals(Object o) {
-        if (PsdEntity.class != o.getClass()) return false;
+        if (!(o instanceof PsdEntity p))
+            return false;
 
-        PsdEntity p = (PsdEntity) o;
         return this.psd.equals(p.getPsd())
                 && this.psdHeader.equals(p.psdHeader)
                 && Arrays.equals(this.psdLayers, p.psdLayers)
-                && preview.equals(p.preview);
+                && (this.preview == null || p.preview == null || (this.preview.equals(p.preview)));
     }
 }
