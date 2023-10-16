@@ -42,16 +42,12 @@ public class PsdHeader {
         return imageResourcesLen;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof PsdHeader p))
-            return false;
-
-        return this.version == p.version
-                && this.channelCount == p.channelCount
-                && this.height == p.height
-                && this.width == p.width
-                && this.channelBitsDepth == p.channelBitsDepth
-                && this.colorMode.equals(p.colorMode);
+    public boolean isDifferent(PsdHeader o) {
+        return this.version == o.version
+                && this.channelCount == o.channelCount
+                && this.height == o.height
+                && this.width == o.width
+                && this.channelBitsDepth == o.channelBitsDepth
+                && this.colorMode.equals(o.colorMode);
     }
 }

@@ -84,26 +84,22 @@ public class PsdLayer {
         return folder;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof PsdLayer p))
-            return false;
-
-        return this.top == p.top
-                && this.bottom == p.bottom
-                && this.left == p.left
-                && this.right == p.right
-                && this.width == p.width
-                && this.height == p.height
-                && this.channelCount == p.channelCount
-                && Arrays.equals(this.channelId, p.channelId)
-                && this.modeKey.equals(p.modeKey)
-                && this.name.equals(p.name)
-                && this.transparency == p.transparency
-                && this.clipping == p.clipping
-                && this.protectTransparency == p.protectTransparency
-                && this.vision == p.vision
-                && this.folder == p.folder
-                && (this.frame == null || p.frame == null || (this.frame.equals(p.frame)));
+    public boolean isDifferent(PsdLayer o) {
+        return this.top == o.top
+                && this.bottom == o.bottom
+                && this.left == o.left
+                && this.right == o.right
+                && this.width == o.width
+                && this.height == o.height
+                && this.channelCount == o.channelCount
+                && Arrays.equals(this.channelId, o.channelId)
+                && this.modeKey.equals(o.modeKey)
+                && this.name.equals(o.name)
+                && this.transparency == o.transparency
+                && this.clipping == o.clipping
+                && this.protectTransparency == o.protectTransparency
+                && this.vision == o.vision
+                && this.folder == o.folder
+                && (this.frame == null || o.frame == null || (this.frame.equals(o.frame)));
     }
 }

@@ -12,11 +12,7 @@ public class Psd {
         return size;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof Psd p))
-            return false;
-
-        return this.name.equals(p.name);
+    public boolean isDifferent(Psd o) {
+        return this.name.equals(o.name);
     }
 }
