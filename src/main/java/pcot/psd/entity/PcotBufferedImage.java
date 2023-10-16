@@ -1,4 +1,4 @@
-package pcot.psd.entity.buffered;
+package pcot.psd.entity;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -67,5 +67,27 @@ public class PcotBufferedImage extends BufferedImage {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (! (o instanceof BufferedImage imgB)) return false;
+        BufferedImage imgA = this;
+        if (imgA.getWidth() != imgB.getWidth() || imgA.getHeight() != imgB.getHeight()) {
+            return false;
+        }
+
+        int width  = imgA.getWidth();
+        int height = imgA.getHeight();
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                if (imgA.getRGB(x, y) != imgB.getRGB(x, y)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 }

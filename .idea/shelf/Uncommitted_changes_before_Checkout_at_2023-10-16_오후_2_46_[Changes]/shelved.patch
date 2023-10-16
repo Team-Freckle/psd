@@ -1,0 +1,17 @@
+Index: src/main/java/Main.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import psd.BinaryReader;\r\nimport psd.PsdReader;\r\n\r\nimport javax.imageio.ImageIO;\r\nimport java.io.*;\r\n\r\npublic class Main {\r\n    public static void main(String[]args) throws IOException {\r\n        System.out.println(\"registering..\");\r\n        PsdReader psdManipulator = new PsdReader();\r\n        BinaryReader binaryReader = new BinaryReader();\r\n\r\n        System.out.println(\"importing..\");\r\n        FileInputStream fis = new FileInputStream(\"C:/Users/cksgu/Desktop/test.psd\");\r\n        BufferedInputStream bis = new BufferedInputStream(fis);\r\n\r\n        System.out.println(\"binary running..\");\r\n        binaryReader.setInput(bis);\r\n        System.out.println(binaryReader.getBinary(90, 300));\r\n        bis = new BufferedInputStream(new FileInputStream(\"C:/Users/cksgu/Desktop/test.psd\"));\r\n\r\n        System.out.println(\"psd running..\");\r\n        psdManipulator.open(bis);\r\n        psdManipulator.run();\r\n\r\n        System.out.println(\"creating..\");\r\n\r\n        ByteArrayOutputStream baos = new ByteArrayOutputStream();\r\n        ImageIO.write(psdManipulator.getPreview(), \"png\", baos);\r\n\r\n        System.out.println(psdManipulator.toString());\r\n\r\n        try {\r\n            // PNG 파일로 저장하고 싶은 경우\r\n            FileOutputStream fos = new FileOutputStream(\"C:/Users/cksgu/Desktop/output.png\");\r\n            fos.write(baos.toByteArray());\r\n            fos.close();\r\n\r\n            // 여기서 PNG 파일이 생성됩니다.\r\n        } catch (IOException e) {\r\n            e.printStackTrace();\r\n        }\r\n    }\r\n}
+===================================================================
+diff --git a/src/main/java/Main.java b/src/main/java/Main.java
+--- a/src/main/java/Main.java	
++++ b/src/main/java/Main.java	
+@@ -16,7 +16,7 @@
+ 
+         System.out.println("binary running..");
+         binaryReader.setInput(bis);
+-        System.out.println(binaryReader.getBinary(90, 300));
++        System.out.println(binaryReader.getBinary(90, 5000));
+         bis = new BufferedInputStream(new FileInputStream("C:/Users/cksgu/Desktop/test.psd"));
+ 
+         System.out.println("psd running..");

@@ -1,15 +1,22 @@
 package pcot.psd.entity;
 
-import lombok.Builder;
-import lombok.Data;
-
-@Data
-@Builder
 public class Psd {
-    private Long idx;
-    private Long nodeIdx;
-    private String name;
-    private int size;
-    private String uploadTime;
-    private String comment;
+    protected String name;
+    protected int size;
+
+    public String getName() {
+        return name;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Psd p))
+            return false;
+
+        return this.name.equals(p.name);
+    }
 }

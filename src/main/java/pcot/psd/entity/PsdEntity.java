@@ -1,23 +1,37 @@
 package pcot.psd.entity;
 
-import lombok.Data;
-import pcot.psd.entity.buffered.PcotBufferedImage;
-import pcot.psd.entity.component.PsdHeader;
-import pcot.psd.entity.component.PsdLayer;
-import java.util.List;
+import java.util.Arrays;
 
-@Data
 public class PsdEntity {
     protected Psd psd;
     protected PsdHeader psdHeader;
     protected PsdLayer[] psdLayers;
     protected PcotBufferedImage preview;
 
-    public void setPsdLayers(List<PsdLayer> psdLayers) {
-        PsdLayer[] layers = new PsdLayer[psdLayers.size()];
-        this.psdLayers = psdLayers.toArray(layers);
+    public Psd getPsd() {
+        return psd;
     }
-    public void setPsdLayers(PsdLayer[] psdLayers) {
-        this.psdLayers = psdLayers;
+
+    public PsdHeader getPsdHeader() {
+        return psdHeader;
+    }
+
+    public PsdLayer[] getPsdLayers() {
+        return psdLayers;
+    }
+
+    public PcotBufferedImage getPreview() {
+        return preview;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof PsdEntity p))
+            return false;
+
+        return this.psd.equals(p.getPsd())
+                && this.psdHeader.equals(p.psdHeader)
+                && Arrays.equals(this.psdLayers, p.psdLayers)
+                && (this.preview == null || p.preview == null || (this.preview.equals(p.preview)));
     }
 }
