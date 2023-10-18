@@ -47,6 +47,7 @@ public class PsdReader extends PsdEntity {
                 makeDummyLayer();
             }
             readLayersImage();
+            readLayersFloor();
             readPreview();
         }
         catch (Exception e) {
@@ -234,6 +235,12 @@ public class PsdReader extends PsdEntity {
                     , r, g, b, a);
         }
         jumpBytes(layerMaskInfoLen - getStreamOffset());
+    }
+
+    protected void readLayersFloor() {
+        for (int i = psdLayers.length - 1; i >= 0; i--) {
+            psdLayers[i].floor = i;
+        }
     }
 
     protected void readPreview() throws IOException {

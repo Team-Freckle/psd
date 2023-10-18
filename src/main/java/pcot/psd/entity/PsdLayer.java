@@ -26,6 +26,7 @@ public class PsdLayer {
      */
     protected int folder;
     protected PsdLayer[] child;
+    protected int floor;
 
     public int getTop() {
         return top;
@@ -96,6 +97,7 @@ public class PsdLayer {
     public PsdLayer[] getChild() {
         return child;
     }
+    public int getFloor() { return floor; }
 
     public boolean isDifferent(PsdLayer o) {
         return this.top == o.top
