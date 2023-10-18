@@ -114,6 +114,7 @@ public class PsdReader extends PsdEntity {
             int nameLen = readByte();
             layer.name = readString(nameLen);
             if(layer.name.equals("</Layer set>")) layer.folder = '<';
+            else layer.folder = null;
 
             if((nameLen + 1) % 4 > 0) jumpBytes(4 - (nameLen + 1) % 4);
 
