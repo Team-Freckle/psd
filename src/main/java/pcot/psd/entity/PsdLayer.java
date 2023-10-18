@@ -18,7 +18,7 @@ public class PsdLayer {
     protected Character protectTransparency;
     protected Character vision;
     protected PcotBufferedImage frame;
-    protected Character folder = null;
+    protected Character folder = 'N';
 
     public int getTop() {
         return top;
