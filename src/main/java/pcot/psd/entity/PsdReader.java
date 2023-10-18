@@ -147,6 +147,7 @@ public class PsdReader extends PsdEntity {
                     int open = folderStack.pop();
                     ArrayList<PsdLayer> lay = new ArrayList<>();
                     psdLayers[open].folder = 1;
+
                     for (int i = 0; i < iLayerCount - open - 1; i++) {
                         int target = open + 1 + i;
 
@@ -158,7 +159,7 @@ public class PsdReader extends PsdEntity {
                             // 무시하기 < 이미 폴더에 포함됨
                         }
                     }
-                    psdLayers[open].child = lay.toArray(new PsdLayer[lay.size()]);
+                    layer.child = lay.toArray(new PsdLayer[lay.size()]);
                 }
                 if (len >= 12) {
                     jumpBytes(8);
