@@ -14,11 +14,11 @@ public class PsdLayer {
     protected String modeKey;
     protected String name;
     protected int transparency;
-    protected char clipping;
-    protected char protectTransparency;
-    protected char vision;
+    protected Character clipping;
+    protected Character protectTransparency;
+    protected Character vision;
     protected PcotBufferedImage frame;
-    protected char folder;
+    protected Character folder = null;
 
     public int getTop() {
         return top;
@@ -64,15 +64,15 @@ public class PsdLayer {
         return transparency;
     }
 
-    public char getClipping() {
+    public Character getClipping() {
         return clipping;
     }
 
-    public char getProtectTransparency() {
+    public Character getProtectTransparency() {
         return protectTransparency;
     }
 
-    public char getVision() {
+    public Character getVision() {
         return vision;
     }
 
@@ -80,7 +80,7 @@ public class PsdLayer {
         return frame;
     }
 
-    public char getFolder() {
+    public Character getFolder() {
         return folder;
     }
 
