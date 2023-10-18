@@ -24,14 +24,10 @@ public class PsdEntity {
         return preview;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof PsdEntity p))
-            return false;
-
-        return this.psd.equals(p.getPsd())
-                && this.psdHeader.equals(p.psdHeader)
-                && Arrays.equals(this.psdLayers, p.psdLayers)
-                && (this.preview == null || p.preview == null || (this.preview.equals(p.preview)));
+    public boolean isDifferent(PsdEntity o) {
+        return this.psd.equals(o.getPsd())
+                && this.psdHeader.equals(o.psdHeader)
+                && Arrays.equals(this.psdLayers, o.psdLayers)
+                && (this.preview == null || o.preview == null || (this.preview.equals(o.preview)));
     }
 }
