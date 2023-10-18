@@ -18,7 +18,14 @@ public class PsdLayer {
     protected Character protectTransparency;
     protected Character vision;
     protected PcotBufferedImage frame;
-    protected Character folder = 'N';
+
+    /**
+     * 폴더 포함 여부
+     * @Data xx0 = 포함되지 않음
+     * @Data xx1 = 포함됨
+     */
+    protected int folder;
+    protected PsdLayer[] child;
 
     public int getTop() {
         return top;
@@ -80,8 +87,14 @@ public class PsdLayer {
         return frame;
     }
 
-    public Character getFolder() {
+    public int getFolder() {
         return folder;
+    }
+    public char getFolderYn() {
+        return child == null ? 'N' : 'Y';
+    }
+    public PsdLayer[] getChild() {
+        return child;
     }
 
     public boolean isDifferent(PsdLayer o) {
