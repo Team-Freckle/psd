@@ -47,7 +47,8 @@ public class PsdReader extends PsdEntity {
                 makeDummyLayer();
             }
             readLayersImage();
-            readLayersFloor();
+            psdLayers = getGlobalLayer();
+            readLayersFloor(psdLayers, 0);
             readPreview();
         }
         catch (Exception e) {
@@ -237,10 +238,24 @@ public class PsdReader extends PsdEntity {
         jumpBytes(layerMaskInfoLen - getStreamOffset());
     }
 
-    protected void readLayersFloor() {
-        for (int i = psdLayers.length - 1; i >= 0; i--) {
-            psdLayers[i].floor = i;
+    protected PsdLayer[] getGlobalLayer() {
+        ArrayList<PsdLayer> layers = new ArrayList<>();
+        for (int i = 0; i < psdLayers.length; i++) {
+            if(psdLayers[i].getFolder() % 10 == 0) layers.add(psdLayers[i]);
         }
+
+        return layers.toArray(new PsdLayer[layers.size()]);
+    }
+
+    protected int readLayersFloor(PsdLayer[] layers, int debs) {
+        for (int i = layers.length - 1; i >= 0; i--) {
+            layers[i].floor = debs;
+            if(layers[i].getFolderYn() == 'Y') {
+                debs = readLayersFloor(layers[i].getChild(), debs);
+            }
+            debs++;
+        }
+        return debs;
     }
 
     protected void readPreview() throws IOException {
