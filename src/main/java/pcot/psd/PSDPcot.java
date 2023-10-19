@@ -19,6 +19,11 @@ public class PSDPcot {
         psdManipulator.run();
         return psdManipulator;
     }
+    public PsdEntity parsingPSD(BufferedInputStream bis) throws IOException {
+        psdManipulator.open(bis);
+        psdManipulator.run();
+        return psdManipulator;
+    }
     public String psdLayerToString(PsdLayer[] layers) {
         String str = new String();
         return getPsdLayerString(layers, 0, str);
