@@ -7,6 +7,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Stack;
 
 public class PsdReader extends PsdEntity {
     protected BufferedInputStream input;
@@ -14,6 +17,7 @@ public class PsdReader extends PsdEntity {
     protected int bufferLen;
     protected int layerCount;
     protected short[] lineLen;
+    protected Stack<Integer> folderStack;
     protected int iLine;
     protected String encoding;
     protected int layerMaskInfoLen;
@@ -23,6 +27,7 @@ public class PsdReader extends PsdEntity {
         layerMaskInfoLen = 0;
         psdHeader = new PsdHeader();
         layerCount = 0;
+        folderStack = new Stack<>();
         psdLayers = null;
     }
 
@@ -42,6 +47,7 @@ public class PsdReader extends PsdEntity {
                 makeDummyLayer();
             }
             readLayersImage();
+            readLayersFloor();
             readPreview();
         }
         catch (Exception e) {
@@ -113,7 +119,8 @@ public class PsdReader extends PsdEntity {
 
             int nameLen = readByte();
             layer.name = readString(nameLen);
-            if(layer.name.equals("</Layer set>")) layer.folder = '<';
+
+            if(layer.name.equals("</Layer set>")) folderStack.push(iLayerCount);
 
             if((nameLen + 1) % 4 > 0) jumpBytes(4 - (nameLen + 1) % 4);
 
@@ -122,14 +129,14 @@ public class PsdReader extends PsdEntity {
                 if(! (sign.equals("8BIM") || sign.equals("8B64"))) {
                     throw new RuntimeException("sign not match : " + getStreamOffset());
                 }
-                layer = readMoreLayerInfo(layer, readString(4), readInt());
+                layer = readMoreLayerInfo(layer, readString(4), readInt(), iLayerCount);
             }
 
             psdLayers[iLayerCount] = layer;
         }
     }
 
-    protected PsdLayer readMoreLayerInfo(PsdLayer layer, String key, int len) {
+    protected PsdLayer readMoreLayerInfo(PsdLayer layer, String key, int len, int iLayerCount) {
         switch (key) {
             case "luni":
                 layer.name = readUtf16(len).substring(2);
@@ -138,7 +145,22 @@ public class PsdReader extends PsdEntity {
             case "lsct":
                 int type = readInt();
                 if (type == 1 || type == 2) {
-                    layer.folder = '>';
+                    int open = folderStack.pop();
+                    ArrayList<PsdLayer> lay = new ArrayList<>();
+                    psdLayers[open].folder = 1;
+
+                    for (int i = 0; i < iLayerCount - open - 1; i++) {
+                        int target = open + 1 + i;
+
+                        if (psdLayers[target].folder % 10 == 0) {
+                            lay.add(psdLayers[target]);
+                            psdLayers[target].folder = 1;
+                        }
+                        else if(psdLayers[target].folder % 10 == 1) {
+                            // 무시하기 < 이미 폴더에 포함됨
+                        }
+                    }
+                    layer.child = lay.toArray(new PsdLayer[lay.size()]);
                 }
                 if (len >= 12) {
                     jumpBytes(8);
@@ -213,6 +235,12 @@ public class PsdReader extends PsdEntity {
                     , r, g, b, a);
         }
         jumpBytes(layerMaskInfoLen - getStreamOffset());
+    }
+
+    protected void readLayersFloor() {
+        for (int i = psdLayers.length - 1; i >= 0; i--) {
+            psdLayers[i].floor = i;
+        }
     }
 
     protected void readPreview() throws IOException {
