@@ -207,6 +207,7 @@ public class PsdReader extends PsdEntity {
         for(int iLayerCount = 0; iLayerCount < layerCount; iLayerCount++) {
             PsdLayer layer = psdLayers[iLayerCount];
             if(layer.width <= 0 || layer.height <= 0) {
+                jumpBytes(8);  // Channel image data Compression len
                 continue;
             }
 
